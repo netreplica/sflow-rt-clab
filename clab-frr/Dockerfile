@@ -1,4 +1,4 @@
-FROM alpine:3.13 as build
+FROM alpine:latest as build
 RUN apk --update add \
       build-base \
       gcc \
@@ -11,15 +11,11 @@ RUN apk --update add \
  && make install
 
 FROM frrouting/frr:v8.2.2
-LABEL maintainer="InMon Corp. https://inmon.com"
-LABEL description="FRR and Host sFlow agent for CONTAINERlab"
-LABEL url=https://hub.docker.com/r/sflow/clab-frr
+LABEL maintainer="Netreplica"
+LABEL description="FRR and Host sFlow agent for CONTAINERlab, fork of sflow/clab-frr"
+LABEL url=https://hub.docker.com/r/netreplica/frr-sflow
 COPY --from=build /usr/sbin/hsflowd /usr/sbin/hsflowd
 COPY --from=build /etc/hsflowd/ /etc/hsflowd/
 RUN apk add --no-cache dmidecode libpcap
-ADD bgpd.conf /etc/frr/
-ADD zebra.conf /etc/frr/
-ADD vtysh.conf /etc/frr/
-ADD daemons /etc/frr/
 ADD start.sh /
 ENTRYPOINT [ "/sbin/tini", "--", "/start.sh" ]
